@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
+import { useRouter } from 'expo-router';
+import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// Tipe data untuk user
 type User = {
   id_user: number;
   tipe_user: string;
@@ -15,22 +12,9 @@ type User = {
   username: string;
 };
 
-// Tipe untuk navigasi
-type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-  Register: undefined;
-};
-
-type HomeScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
-};
-
-const Stack = createNativeStackNavigator();
-
-// Tidak ada lagi NavigationContainer di sini
-const HomeScreen = ({ navigation }: HomeScreenProps) => {
+export default function HomeScreen() {
   const [users, setUsers] = useState<User[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUsers();
@@ -41,96 +25,41 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       const response = await axios.get('http://127.0.0.1:8000/api/users');
       setUsers(response.data.data);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Gagal ambil data users:', error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>List of Users</Text>
+      <Text style={styles.title}>Daftar Users</Text>
       <FlatList
         data={users}
         keyExtractor={(item) => item.id_user.toString()}
         renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.itemName}>{item.nama}</Text>
-            <Text style={styles.itemType}>Type: {item.tipe_user}</Text>
-            <Text style={styles.itemAddress}>Address: {item.alamat}</Text>
-            <Text style={styles.itemPhone}>Phone: {item.telpon}</Text>
-            <Text style={styles.itemUsername}>Username: {item.username}</Text>
+          <View style={styles.card}>
+            <Text style={styles.name}>{item.nama}</Text>
+            <Text>Tipe: {item.tipe_user}</Text>
+            <Text>Alamat: {item.alamat}</Text>
+            <Text>Telpon: {item.telpon}</Text>
+            <Text>Username: {item.username}</Text>
           </View>
         )}
       />
-      <View style={styles.navButtons}>
-        <Button title="Login" onPress={() => navigation.navigate('Login')} />
-        <Button title="Register" onPress={() => navigation.navigate('Register')} />
-      </View>
+      <Button title="Login" onPress={() => router.push('/login')} />
+      <Button title="Register" onPress={() => router.push('/register')} />
     </View>
   );
-};
-
-const LoginScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login Page</Text>
-    </View>
-  );
-};
-
-const RegisterScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register Page</Text>
-    </View>
-  );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  itemContainer: {
-    marginBottom: 10,
-    padding: 10,
+  container: { flex: 1, padding: 20, backgroundColor: '#f0f0f0' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 15 },
+  card: {
     backgroundColor: '#fff',
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 8,
+    elevation: 3,
   },
-  itemName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  itemType: {
-    fontSize: 16,
-    color: '#007bff',
-  },
-  itemAddress: {
-    fontSize: 14,
-    color: '#6c757d',
-  },
-  itemPhone: {
-    fontSize: 14,
-    color: '#6c757d',
-  },
-  itemUsername: {
-    fontSize: 14,
-    color: '#28a745',
-  },
-  navButtons: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  name: { fontSize: 18, fontWeight: '600' },
 });
-
-export default HomeScreen;
